@@ -5,7 +5,7 @@ let state = {
   projects: [],
   tasks: [],
   entries: [],
-  timer: { running: false, startMs: null, entryId: null },
+  timer: { running: false, startMs: null, entryId: null, notified60min: false },
   theme: 'light',
 };
 
@@ -17,7 +17,7 @@ function load() {
     if (raw) Object.assign(state, JSON.parse(raw));
   } catch {}
   ['clients','projects','tasks','entries'].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
-  if (!state.timer) state.timer = { running: false, startMs: null, entryId: null };
+  if (!state.timer) state.timer = { running: false, startMs: null, entryId: null, notified60min: false };
   if (!state.theme) state.theme = 'light';
   // Validate timer state — if startMs is missing or entry no longer exists, reset
   if (state.timer.running) {
@@ -51,7 +51,8 @@ function timerStart(desc, clientId, projectId, taskId) {
     startMs: now, endMs: null,
     manual: false,
   });
-  state.timer = { running: true, startMs: now, entryId: id };
+  state.timer = { running: true, startMs: now, entryId: id, notified60min: false };
+  requestNotificationPermission();
   save();
   renderTopbar();
   startTimerInterval();
@@ -62,7 +63,7 @@ function timerStop() {
   if (!state.timer.running) return;
   const entry = state.entries.find(e => e.id === state.timer.entryId);
   if (entry) entry.endMs = Date.now();
-  state.timer = { running: false, startMs: null, entryId: null };
+  state.timer = { running: false, startMs: null, entryId: null, notified60min: false };
   save();
   clearInterval(timerInterval);
   timerInterval = null;
@@ -75,7 +76,31 @@ function startTimerInterval() {
   timerInterval = setInterval(() => {
     renderTopbarTimer();
     if (currentView === 'tracker') renderRunningEntry();
+    check60MinuteNotification();
   }, 1000);
+}
+
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function check60MinuteNotification() {
+  if (!state.timer.running || state.timer.notified60min) return;
+  const elapsed = Date.now() - state.timer.startMs;
+  const sixtyMinutesMs = 60 * 60 * 1000;
+  if (elapsed >= sixtyMinutesMs) {
+    state.timer.notified60min = true;
+    const entry = state.entries.find(e => e.id === state.timer.entryId);
+    const desc = entry ? entry.desc : 'Your timer';
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Time Tracker Alert', {
+        body: `${desc} has been running for 60 minutes`,
+        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⏱</text></svg>',
+      });
+    }
+  }
 }
 
 function formatMs(ms) {
