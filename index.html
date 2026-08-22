@@ -644,22 +644,22 @@ function requestNotificationPermission() {
 function check60MinuteNotification() {
   if (!state.timer.running || state.timer.notified60min) return;
   const elapsed = Date.now() - state.timer.startMs;
-  const sixtyMinutesMs = 60 * 60 * 1000;
+  const timeAlertMs = 2 * 60 * 1000; // 2 minutes for testing (change to 60 * 60 * 1000 for production)
 
-  if (elapsed >= sixtyMinutesMs) {
+  if (elapsed >= timeAlertMs) {
     state.timer.notified60min = true;
     const entry = state.entries.find(e => e.id === state.timer.entryId);
     const desc = entry ? entry.desc : 'Your timer';
-    console.log('[Timer] 60 minute mark reached for:', desc);
+    console.log('[Timer] Time alert mark reached for:', desc);
     console.log('[Timer] Notification available:', 'Notification' in window);
     console.log('[Timer] Permission status:', 'Notification' in window ? Notification.permission : 'N/A');
 
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
         const n = new Notification('⏱ Time Tracker Alert', {
-          body: `${desc} has been running for 60 minutes`,
+          body: `${desc} has been running for 2 minutes (TEST)`,
           icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⏱</text></svg>',
-          tag: 'timer-60min',
+          tag: 'timer-alert',
           requireInteraction: false,
         });
         console.log('[Timer] Notification fired successfully');
