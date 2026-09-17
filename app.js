@@ -762,23 +762,52 @@ function deleteTask(id) {
 
 // ── REPORTS ──────────────────────────────────────────────
 let reportWeekOffset = 0;
+let reportMonthOffset = 0;
+let reportPeriod = 'weekly';
 let reportGroupBy = 'client';
 let reportFilterClient = '';
 let reportFilterProject = '';
 
+function monthStart(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  d.setDate(1);
+  return d;
+}
+
+function monthEnd(date) {
+  const d = new Date(date);
+  d.setHours(23,59,59,999);
+  d.setMonth(d.getMonth() + 1);
+  d.setDate(0);
+  return d;
+}
+
 function renderReports() {
   const base = new Date();
-  base.setDate(base.getDate() + reportWeekOffset * 7);
-  const ws = weekStart(base);
-  const we = weekEnd(base);
+  let startDate, endDate, startLabel, endLabel, periodType;
 
-  let entries = state.entries.filter(e => e.endMs && e.startMs >= ws.getTime() && e.startMs <= we.getTime());
+  if (reportPeriod === 'weekly') {
+    base.setDate(base.getDate() + reportWeekOffset * 7);
+    startDate = weekStart(base);
+    endDate = weekEnd(base);
+    startLabel = startDate.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    endLabel = endDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    periodType = 'Weekly';
+  } else {
+    base.setMonth(base.getMonth() + reportMonthOffset);
+    startDate = monthStart(base);
+    endDate = monthEnd(base);
+    startLabel = startDate.toLocaleDateString('en-GB', { month:'long', year:'numeric' });
+    endLabel = '';
+    periodType = 'Monthly';
+  }
+
+  let entries = state.entries.filter(e => e.endMs && e.startMs >= startDate.getTime() && e.startMs <= endDate.getTime());
   if (reportFilterClient) entries = entries.filter(e => e.clientId === reportFilterClient);
   if (reportFilterProject) entries = entries.filter(e => e.projectId === reportFilterProject);
 
   const totalMs = entries.reduce((s,e) => s + (e.endMs - e.startMs), 0);
-  const wsLabel = ws.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
-  const weLabel = we.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
 
   // Group data
   const grouped = {};
@@ -793,13 +822,14 @@ function renderReports() {
   });
 
   const rows = Object.values(grouped).sort((a,b) => b.ms - a.ms);
+  const periodLabel = endLabel ? `${startLabel} – ${endLabel}` : startLabel;
 
   document.getElementById('app-content').innerHTML = `
     <div class="content">
       <div class="report-header">
         <div>
-          <h2>Weekly Timesheet Report</h2>
-          <div class="report-period">${wsLabel} – ${weLabel}</div>
+          <h2>${periodType} Timesheet Report</h2>
+          <div class="report-period">${periodLabel}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost btn-sm" onclick="printReport()">🖨️ Print</button>
@@ -809,10 +839,14 @@ function renderReports() {
       </div>
 
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-        <button class="date-nav-btn" onclick="reportWeekOffset--;renderReports()">‹</button>
-        <span class="date-range-label" style="font-size:13px">${wsLabel} – ${weLabel}</span>
-        <button class="date-nav-btn" onclick="if(reportWeekOffset<0){reportWeekOffset++;renderReports()}" ${reportWeekOffset===0?'disabled style="opacity:.4"':''}>›</button>
-        ${reportWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;renderReports()">Current Week</button>`:''}
+        <select class="filter-select" onchange="reportPeriod=this.value;reportWeekOffset=0;reportMonthOffset=0;renderReports()" style="width:auto">
+          <option value="weekly" ${reportPeriod==='weekly'?'selected':''}>Weekly</option>
+          <option value="monthly" ${reportPeriod==='monthly'?'selected':''}>Monthly</option>
+        </select>
+        <button class="date-nav-btn" onclick="${reportPeriod==='weekly'?'reportWeekOffset--':'reportMonthOffset--'};renderReports()">‹</button>
+        <span class="date-range-label" style="font-size:13px">${periodLabel}</span>
+        <button class="date-nav-btn" onclick="${reportPeriod==='weekly'?'if(reportWeekOffset<0){reportWeekOffset++;renderReports()}':'if(reportMonthOffset<0){reportMonthOffset++;renderReports()}'}" ${(reportPeriod==='weekly'&&reportWeekOffset===0)||(reportPeriod==='monthly'&&reportMonthOffset===0)?'disabled style="opacity:.4"':''}>›</button>
+        ${(reportPeriod==='weekly'&&reportWeekOffset!==0)||(reportPeriod==='monthly'&&reportMonthOffset!==0)?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;reportMonthOffset=0;renderReports()">Current ${reportPeriod==='weekly'?'Week':'Month'}</button>`:''}
       </div>
 
       <div class="filters">
@@ -901,10 +935,21 @@ function printReport() {
 
 function downloadCSV() {
   const base = new Date();
-  base.setDate(base.getDate() + reportWeekOffset * 7);
-  const ws = weekStart(base);
-  const we = weekEnd(base);
-  let entries = state.entries.filter(e => e.endMs && e.startMs >= ws.getTime() && e.startMs <= we.getTime());
+  let startDate, endDate, filename;
+
+  if (reportPeriod === 'weekly') {
+    base.setDate(base.getDate() + reportWeekOffset * 7);
+    startDate = weekStart(base);
+    endDate = weekEnd(base);
+    filename = `timesheet-week-${startDate.toISOString().slice(0,10)}`;
+  } else {
+    base.setMonth(base.getMonth() + reportMonthOffset);
+    startDate = monthStart(base);
+    endDate = monthEnd(base);
+    filename = `timesheet-${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  let entries = state.entries.filter(e => e.endMs && e.startMs >= startDate.getTime() && e.startMs <= endDate.getTime());
   if (reportFilterClient) entries = entries.filter(e => e.clientId === reportFilterClient);
   if (reportFilterProject) entries = entries.filter(e => e.projectId === reportFilterProject);
 
@@ -925,25 +970,36 @@ function downloadCSV() {
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `timesheet-${ws.toISOString().slice(0,10)}.csv`;
+  a.href = url; a.download = `${filename}.csv`;
   a.click(); URL.revokeObjectURL(url);
 }
 
 function emailReport() {
   const base = new Date();
-  base.setDate(base.getDate() + reportWeekOffset * 7);
-  const ws = weekStart(base);
-  const we = weekEnd(base);
-  let entries = state.entries.filter(e => e.endMs && e.startMs >= ws.getTime() && e.startMs <= we.getTime());
+  let startDate, endDate, periodLabel;
+
+  if (reportPeriod === 'weekly') {
+    base.setDate(base.getDate() + reportWeekOffset * 7);
+    startDate = weekStart(base);
+    endDate = weekEnd(base);
+    const wsLabel = startDate.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    const weLabel = endDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    periodLabel = `${wsLabel} – ${weLabel}`;
+  } else {
+    base.setMonth(base.getMonth() + reportMonthOffset);
+    startDate = monthStart(base);
+    endDate = monthEnd(base);
+    periodLabel = startDate.toLocaleDateString('en-GB', { month:'long', year:'numeric' });
+  }
+
+  let entries = state.entries.filter(e => e.endMs && e.startMs >= startDate.getTime() && e.startMs <= endDate.getTime());
   if (reportFilterClient) entries = entries.filter(e => e.clientId === reportFilterClient);
   if (reportFilterProject) entries = entries.filter(e => e.projectId === reportFilterProject);
   if (entries.length === 0) return alert('No entries found for this period.');
   const totalMs = entries.reduce((s,e) => s + (e.endMs - e.startMs), 0);
 
-  const wsLabel = ws.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
-  const weLabel = we.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-
-  let body = `Weekly Timesheet: ${wsLabel} – ${weLabel}\n\n`;
+  const reportType = reportPeriod === 'weekly' ? 'Weekly' : 'Monthly';
+  let body = `${reportType} Timesheet: ${periodLabel}\n\n`;
   body += `Total Hours: ${msToDec(totalMs)}h (${formatDuration(totalMs)})\n\n`;
   body += `ENTRIES:\n${'─'.repeat(60)}\n`;
   entries.sort((a,b)=>a.startMs-b.startMs).forEach(e => {
@@ -953,10 +1009,9 @@ function emailReport() {
   });
 
   const recipient = prompt('Send to email address (leave blank to use default email client):', '');
-  const subject = encodeURIComponent(`Timesheet ${wsLabel} – ${weLabel}`);
+  const subject = encodeURIComponent(`${reportType} Timesheet ${periodLabel}`);
   const bodyEnc = encodeURIComponent(body);
   const mailLink = `mailto:${recipient||''}?subject=${subject}&body=${bodyEnc}`;
-  // mailto URIs have browser length limits; offer clipboard fallback for long reports
   if (mailLink.length > 2000 && navigator.clipboard) {
     navigator.clipboard.writeText(body).then(() => {
       alert('Report copied to clipboard (too long for mailto). Paste into your email client.');
