@@ -1077,6 +1077,21 @@ function openUpgradeModal() {
   `, null);
 }
 
+function openUpgradeModalForFeature(featureName) {
+  const featureMessages = {
+    'pdf': { title: 'PDF Export', description: 'Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features' },
+    'email': { title: 'Email Report', description: 'Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features' }
+  };
+  const feature = featureMessages[featureName];
+  openModal('upgrade-feature-modal', 'Upgrade to Premium', `
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:48px;margin-bottom:16px">⭐️</div>
+      <p style="font-size:16px;font-weight:600;margin-bottom:8px">${feature.description}</p>
+      <p style="font-size:13px;color:var(--text2);margin-top:24px">Premium: £42 one-time purchase</p>
+    </div>
+  `, null);
+}
+
 function openClientModal(id) {
   if (!id && state.clients.length >= 3) {
     openUpgradeModal();
@@ -1228,7 +1243,7 @@ function exportToCSV() {
 
 function exportToPDF() {
   if (!state.isPremium) {
-    alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
+    openUpgradeModalForFeature('pdf');
     return;
   }
   alert('PDF export coming soon!');
@@ -1236,7 +1251,7 @@ function exportToPDF() {
 
 function emailReport() {
   if (!state.isPremium) {
-    alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
+    openUpgradeModalForFeature('email');
     return;
   }
   alert('Email report coming soon!');
