@@ -1095,6 +1095,12 @@ function buildShell() {
           </div>
         </nav>
         <div class="sidebar-footer">
+          <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;font-size:13px;margin-bottom:8px" onclick="exportData()">
+            <span style="font-size:16px">⬇️</span> Export
+          </button>
+          <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;font-size:13px;margin-bottom:8px" onclick="importData()">
+            <span style="font-size:16px">⬆️</span> Import
+          </button>
           <div class="theme-toggle" onclick="toggleTheme()">
             <span id="theme-label">🌙 Dark Mode</span>
           </div>
@@ -1106,6 +1112,43 @@ function buildShell() {
       </div>
     </div>
   `;
+}
+
+// ── EXPORT/IMPORT ─────────────────────────────────────────
+function exportData() {
+  const dataStr = JSON.stringify(state, null, 2);
+  const filename = `va-timetracker-backup-${new Date().toISOString().slice(0,10)}.json`;
+  if (window.claude?.downloads?.save) {
+    window.claude.downloads.save(dataStr, filename);
+    alert('Data exported successfully!');
+  } else {
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('Data exported successfully!');
+  }
+}
+
+function importData() {
+  const json = prompt('Paste your exported data (JSON):');
+  if (!json) return;
+  try {
+    const imported = JSON.parse(json);
+    if (imported.clients && imported.projects && imported.tasks && imported.entries) {
+      Object.assign(state, imported);
+      save();
+      alert('Data imported successfully! Reloading...');
+      location.reload();
+    } else {
+      alert('Invalid data format. Make sure you copied the full export.');
+    }
+  } catch (e) {
+    alert('Error parsing data: ' + e.message);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
