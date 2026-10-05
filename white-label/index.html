@@ -1271,19 +1271,21 @@ function renderReports() {
 
   const entries = state.entries.filter(e => e.endMs && e.startMs >= ws.getTime() && e.startMs <= we.getTime());
 
-  const byClient = {};
-  const byProject = {};
+  const byGroup = {};
 
   entries.forEach(e => {
-    const clientId = e.clientId || '__none__';
-    const projectId = e.projectId || '__none__';
-
-    byClient[clientId] = (byClient[clientId] || 0) + entryDuration(e);
-    byProject[projectId] = (byProject[projectId] || 0) + entryDuration(e);
+    let groupId;
+    if (reportGroupBy === 'client') {
+      groupId = e.clientId || '__none__';
+    } else if (reportGroupBy === 'project') {
+      groupId = e.projectId || '__none__';
+    } else {
+      groupId = e.taskId || '__none__';
+    }
+    byGroup[groupId] = (byGroup[groupId] || 0) + entryDuration(e);
   });
 
-  const clientRows = Object.entries(byClient).sort((a,b) => b[1]-a[1]);
-  const projectRows = Object.entries(byProject).sort((a,b) => b[1]-a[1]);
+  const groupRows = Object.entries(byGroup).sort((a,b) => b[1]-a[1]);
   const totalMs = entries.reduce((sum, e) => sum + entryDuration(e), 0);
 
   const wsLabel = ws.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
@@ -1306,6 +1308,11 @@ function renderReports() {
       </div>
 
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <select onchange="reportGroupBy=this.value;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+          <option value="client" ${reportGroupBy==='client'?'selected':''}>Group by Client</option>
+          <option value="project" ${reportGroupBy==='project'?'selected':''}>Group by Project</option>
+          <option value="task" ${reportGroupBy==='task'?'selected':''}>Group by Task</option>
+        </select>
         <button class="btn btn-sm" onclick="exportToCSV()" style="background:var(--green);color:white;border:none;cursor:pointer">📊 CSV Export</button>
         <button class="btn btn-sm" onclick="exportToPDF()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features"':''}>📄 PDF Export</button>
         <button class="btn btn-sm" onclick="emailReport()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features"':''}>✉️ Email Report</button>
@@ -1319,44 +1326,25 @@ function renderReports() {
         </div>
       </div>
 
-      ${clientRows.length > 0 ? `
-      <div class="card" style="margin-bottom:24px">
-        <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
-          <span style="font-size:16px;font-weight:700">Time by Client</span>
-        </div>
-        <div style="padding:16px 18px">
-          ${clientRows.map(([cid, ms]) => {
-            const pct = totalMs > 0 ? Math.round((ms / totalMs) * 100) : 0;
-            const name = cid === '__none__' ? 'No Client' : clientName(cid);
-            const color = cid === '__none__' ? '#9ca3af' : clientColor(cid);
-            return `<div style="margin-bottom:16px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span style="width:12px;height:12px;border-radius:50%;background:${color}"></span>
-                  <span style="font-weight:600">${name}</span>
-                </div>
-                <span style="font-weight:700">${formatDuration(ms)}</span>
-              </div>
-              <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
-                <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .3s"></div>
-              </div>
-              <div style="font-size:11px;color:var(--text2);margin-top:4px">${pct}% of total time</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      ${projectRows.length > 0 ? `
+      ${groupRows.length > 0 ? `
       <div class="card">
         <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
-          <span style="font-size:16px;font-weight:700">Time by Project</span>
+          <span style="font-size:16px;font-weight:700">Time by ${reportGroupBy === 'client' ? 'Client' : reportGroupBy === 'project' ? 'Project' : 'Task'}</span>
         </div>
         <div style="padding:16px 18px">
-          ${projectRows.map(([pid, ms]) => {
+          ${groupRows.map(([gid, ms]) => {
             const pct = totalMs > 0 ? Math.round((ms / totalMs) * 100) : 0;
-            const name = pid === '__none__' ? 'No Project' : projectName(pid);
-            const color = pid === '__none__' ? '#9ca3af' : projectColor(pid);
+            let name, color;
+            if (reportGroupBy === 'client') {
+              name = gid === '__none__' ? 'No Client' : clientName(gid);
+              color = gid === '__none__' ? '#9ca3af' : clientColor(gid);
+            } else if (reportGroupBy === 'project') {
+              name = gid === '__none__' ? 'No Project' : projectName(gid);
+              color = gid === '__none__' ? '#9ca3af' : projectColor(gid);
+            } else {
+              name = gid === '__none__' ? 'No Task' : taskName(gid);
+              color = '#9ca3af';
+            }
             return `<div style="margin-bottom:16px">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
                 <div style="display:flex;align-items:center;gap:8px">
