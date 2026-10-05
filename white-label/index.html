@@ -1297,7 +1297,7 @@ function renderReports() {
           <button class="date-nav-btn" onclick="reportWeekOffset--;renderReports()" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
           <span style="font-size:14px;font-weight:600">${reportLabel} Report: ${wsLabel} – ${weLabel}</span>
           <button class="date-nav-btn" onclick="if(reportWeekOffset<0){reportWeekOffset++;renderReports()}" ${reportWeekOffset===0?'disabled style="opacity:.4"':''} style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
-          ${reportWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;renderReports()">This ${reportLabel}</button>`:''}
+          ${reportWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;renderReports()">This ${reportMode === 'weekly' ? 'week' : 'month'}</button>`:''}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn ${reportMode==='weekly'?'btn-primary':'btn-ghost'} btn-sm" onclick="reportMode='weekly';reportWeekOffset=0;renderReports()">Weekly</button>
