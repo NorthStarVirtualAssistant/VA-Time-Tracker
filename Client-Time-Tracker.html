@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Time Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱</text></svg>">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface2: #f0f2f5;
+      --border: #e1e4e8;
+      --text: #1a1d23;
+      --text2: #6b7280;
+      --text3: #9ca3af;
+      --primary: #2E75B6;
+      --primary-dark: #1F5C99;
+      --primary-bg: #eef2ff;
+      --accent: #6366f1;
+      --accent-bg: #eef2ff;
+      --green: #10b981;
+      --green-bg: #ecfdf5;
+      --red: #ef4444;
+      --red-bg: #fef2f2;
+      --orange: #f59e0b;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.05);
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+    [data-theme="dark"] {
+      --bg: #0f1117;
+      --surface: #1a1d26;
+      --surface2: #22263a;
+      --border: #2d3148;
+      --text: #e8eaf0;
+      --text2: #9ca3b8;
+      --text3: #6b7280;
+      --primary: #2E75B6;
+      --primary-dark: #5B9FD8;
+      --primary-bg: #1e2a3f;
+      --accent: #818cf8;
+      --accent-bg: #1e1f3a;
+      --green: #34d399;
+      --green-bg: #0d2e23;
+      --red: #f87171;
+      --red-bg: #2d1515;
+      --shadow: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.25), 0 2px 4px -1px rgba(0,0,0,.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .app-shell { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 220px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .sidebar-logo {
+      padding: 20px 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      min-height: 80px;
+      flex-wrap: wrap;
+    }
+
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo-image {
+      width: 40px; height: 40px;
+      object-fit: contain;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .logo-text { font-weight: 700; font-size: 15px; color: var(--text); }
+    .logo-sub { font-size: 11px; color: var(--text2); }
+
+    .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+
+    .nav-section { margin-bottom: 20px; }
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--text3);
+      padding: 0 8px;
+      margin-bottom: 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: background .15s, color .15s;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--primary-bg); color: var(--primary); }
+    .nav-item .icon { font-size: 16px; width: 18px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 12px 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-button {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s;
+      background: transparent;
+      border: none;
+      width: 100%;
+      justify-content: flex-start;
+      margin-bottom: 6px;
+    }
+    .footer-button:hover { background: var(--surface2); }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s;
+    }
+    .theme-toggle:hover { background: var(--surface2); }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .page-title { font-size: 17px; font-weight: 700; }
+
+    .timer-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 6px 14px 6px 10px;
+    }
+    .timer-bar.running { background: var(--green-bg); border-color: var(--green); }
+    .timer-display {
+      font-size: 18px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+      min-width: 72px;
+    }
+    .timer-bar.running .timer-display { color: var(--green); }
+
+    .content { flex: 1; padding: 24px; max-width: 1200px; width: 100%; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 16px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: opacity .15s, transform .1s;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: .88; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-green { background: var(--green); color: white; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-sm { height: 30px; padding: 0 10px; font-size: 12px; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .stat-label { font-size: 12px; color: var(--text2); font-weight: 500; text-transform: uppercase; }
+    .stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      width: 100%;
+      max-width: 600px;
+      overflow: auto;
+      max-height: 90vh;
+    }
+    .modal-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 16px; font-weight: 700; }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: var(--text2); }
+    .form-group input, .form-group select {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 13.5px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+
+    .logo-preview {
+      width: 100%;
+      height: 60px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text2);
+      overflow: hidden;
+    }
+    .logo-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .settings-preview {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .preview-logo {
+      width: 32px; height: 32px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    .preview-name { font-weight: 700; color: var(--text); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text2);
+    }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .section-title { font-size: 16px; font-weight: 700; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform .2s; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+    }
+
+    @media print {
+      .sidebar, .topbar, .btn, .sidebar-footer { display: none !important; }
+      .main { margin-left: 0 !important; }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <script>
+// ── STATE ──────────────────────────────────────────────────
+const STATE_KEY = 'ctt_timetracker_v1';
+const CUSTOM_KEY = 'ctt_customization';
+
+let state = {
+  clients: [],
+  projects: [],
+  tasks: [],
+  entries: [],
+  timer: { running: false, startMs: null, entryId: null },
+  theme: 'light',
+};
+
+let customization = {
+  companyName: 'Client Time Tracker',
+  logoImage: null,
+};
+
+const COLORS = ['#2E75B6','#6366f1','#10b981','#f59e0b','#ef4444','#0ea5e9','#8b5cf6','#ec4899','#14b8a6','#f97316'];
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (raw) Object.assign(state, JSON.parse(raw));
+  } catch {}
+  try {
+    const custom = localStorage.getItem(CUSTOM_KEY);
+    if (custom) Object.assign(customization, JSON.parse(custom));
+  } catch {}
+  ['clients','projects','tasks','entries'].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
+  if (!state.timer) state.timer = { running: false, startMs: null, entryId: null };
+  if (!state.theme) state.theme = 'light';
+  if (state.timer.running) {
+    const entry = state.entries.find(e => e.id === state.timer.entryId);
+    if (!entry || !state.timer.startMs) {
+      state.timer = { running: false, startMs: null, entryId: null };
+    }
+  }
+}
+
+function save() {
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+
+function saveCustomization() {
+  localStorage.setItem(CUSTOM_KEY, JSON.stringify(customization));
+  updateBranding();
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function updateBranding() {
+  const logoMark = document.querySelector('.logo-mark');
+  const logoImg = document.querySelector('.logo-image');
+  const logoText = document.querySelector('.logo-text');
+
+  if (customization.logoImage && logoImg) {
+    logoImg.src = customization.logoImage;
+    logoImg.style.display = 'block';
+    if (logoMark) logoMark.style.display = 'none';
+  } else {
+    if (logoImg) logoImg.style.display = 'none';
+    if (logoMark) logoMark.style.display = 'flex';
+  }
+
+  if (logoText) {
+    logoText.textContent = customization.companyName || 'Client Time Tracker';
+  }
+}
+
+// ── TIMER ──────────────────────────────────────────────────
+let timerInterval = null;
+
+function timerStart(desc, clientId, projectId, taskId) {
+  if (state.timer.running) timerStop();
+  const id = uid();
+  const now = Date.now();
+  state.entries.push({
+    id, desc: desc || 'Untitled',
+    clientId: clientId || null,
+    projectId: projectId || null,
+    taskId: taskId || null,
+    startMs: now, endMs: null,
+    manual: false,
+  });
+  state.timer = { running: true, startMs: now, entryId: id };
+  save();
+  renderTopbar();
+  startTimerInterval();
+  renderCurrentView();
+}
+
+function timerStop() {
+  if (!state.timer.running) return;
+  const entry = state.entries.find(e => e.id === state.timer.entryId);
+  if (entry) entry.endMs = Date.now();
+  state.timer = { running: false, startMs: null, entryId: null };
+  save();
+  clearInterval(timerInterval);
+  timerInterval = null;
+  renderTopbar();
+  renderCurrentView();
+}
+
+function startTimerInterval() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    renderTopbarTimer();
+  }, 1000);
+}
+
+function formatMs(ms) {
+  if (ms < 0) ms = 0;
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function formatDuration(ms) {
+  if (!ms || ms <= 0) return '0:00';
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h > 0 ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m`;
+}
+
+function entryDuration(e) {
+  if (e.endMs) return e.endMs - e.startMs;
+  if (state.timer.running && e.id === state.timer.entryId) return Date.now() - e.startMs;
+  return 0;
+}
+
+// ── HELPERS ────────────────────────────────────────────────
+function getClient(id) { return state.clients.find(c => c.id === id); }
+function getProject(id) { return state.projects.find(p => p.id === id); }
+function getTask(id) { return state.tasks.find(t => t.id === id); }
+function clientName(id) { const c = getClient(id); return c ? c.name : '—'; }
+function projectName(id) { const p = getProject(id); return p ? p.name : '—'; }
+function taskName(id) { const t = getTask(id); return t ? t.name : '—'; }
+function clientColor(id) { const c = getClient(id); return c ? c.color : '#9ca3af'; }
+function projectColor(id) { const p = getProject(id); return p ? p.color : '#9ca3af'; }
+
+function weekStart(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  const day = d.getDay();
+  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return d;
+}
+
+function weekEnd(d) {
+  const e = new Date(weekStart(d));
+  e.setDate(e.getDate() + 6);
+  e.setHours(23,59,59,999);
+  return e;
+}
+
+function monthStart(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  d.setDate(1);
+  return d;
+}
+
+function monthEnd(date) {
+  const d = new Date(date);
+  d.setHours(23,59,59,999);
+  d.setMonth(d.getMonth() + 1);
+  d.setDate(0);
+  return d;
+}
+
+function sameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function formatDate(ms) {
+  const d = new Date(ms);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatTime(ms) {
+  return new Date(ms).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+function todayMs() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return now.getTime();
+}
+
+function entryMetaLine(e) {
+  const parts = [];
+  if (e.clientId) parts.push(clientName(e.clientId));
+  if (e.projectId) parts.push(projectName(e.projectId));
+  if (e.taskId) parts.push(taskName(e.taskId));
+  return parts.join(' › ') || 'No project';
+}
+
+// ── EXPORT/IMPORT ──────────────────────────────────────────
+function exportData() {
+  const dataStr = JSON.stringify(state, null, 2);
+  const filename = `ctt-backup-${new Date().toISOString().slice(0,10)}.json`;
+  if (window.claude?.downloads?.save) {
+    window.claude.downloads.save(dataStr, filename);
+    alert('Data exported successfully!');
+  } else {
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('Data exported successfully!');
+  }
+}
+
+function importData() {
+  const json = prompt('Paste your exported data (JSON):');
+  if (!json) return;
+  try {
+    const imported = JSON.parse(json);
+    if (imported.clients && imported.projects && imported.tasks && imported.entries) {
+      Object.assign(state, imported);
+      save();
+      alert('Data imported successfully! Reloading...');
+      location.reload();
+    } else {
+      alert('Invalid data format. Make sure you copied the full export.');
+    }
+  } catch (e) {
+    alert('Error parsing data: ' + e.message);
+  }
+}
+
+// ── SETTINGS/CUSTOMIZATION ──────────────────────────────────
+function openSettings() {
+  openModal('settings-modal', 'Customize Your Branding', `
+    <div class="form-group">
+      <label>Company Name</label>
+      <input id="set-company-name" type="text" placeholder="Your company name" value="${customization.companyName || ''}">
+    </div>
+
+    <div class="form-group">
+      <label>Logo Image</label>
+      <div class="file-input-wrapper">
+        <button class="btn btn-ghost" onclick="document.getElementById('logo-file-input').click()">Upload Logo</button>
+        <input id="logo-file-input" type="file" accept="image/*" onchange="handleLogoUpload(event)">
+      </div>
+      ${customization.logoImage ? `<p style="font-size:11px;color:var(--text2);margin-top:6px">✓ Logo uploaded</p>` : ''}
+    </div>
+
+    <div style="margin-top:20px">
+      <p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">PREVIEW</p>
+      <div class="settings-preview">
+        <div class="preview-header">
+          ${customization.logoImage ? `<img class="preview-logo" src="${customization.logoImage}" alt="logo">` : '<div style="width:32px;height:32px;background:linear-gradient(135deg,#2E75B6,#6366f1);border-radius:6px;flex-shrink:0"></div>'}
+          <div>
+            <div class="preview-name">${document.getElementById('set-company-name')?.value || customization.companyName || 'Client Time Tracker'}</div>
+            <div style="font-size:11px;color:var(--text2)">Time tracking application</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `, () => saveSettings());
+}
+
+function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    customization.logoImage = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveSettings() {
+  const companyName = document.getElementById('set-company-name')?.value.trim();
+  if (!companyName) return alert('Company name is required.');
+
+  customization.companyName = companyName;
+  saveCustomization();
+  closeModal();
+  alert('Branding updated successfully!');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+let currentView = 'dashboard';
+
+function navigate(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.view === view);
+  });
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  const views = { dashboard: renderDashboard, tracker: renderTracker, clients: renderClients, projects: renderProjects, tasks: renderTasksPage };
+  const fn = views[currentView];
+  if (fn) fn();
+}
+
+// ── TOPBAR ────────────────────────────────────────────────
+function renderTopbar() {
+  const tb = document.getElementById('topbar');
+  const titles = { dashboard: 'Dashboard', tracker: 'Time Tracker', clients: 'Clients', projects: 'Projects', tasks: 'Tasks' };
+  tb.innerHTML = `
+    <div class="topbar-left">
+      <button class="btn btn-ghost btn-icon" id="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+      <span class="page-title">${titles[currentView] || 'Client Time Tracker'}</span>
+    </div>
+    <div class="timer-bar ${state.timer.running ? 'running' : ''}" id="topbar-timer">
+      <span class="timer-display" id="timer-display">${state.timer.running ? formatMs(Date.now() - state.timer.startMs) : '00:00:00'}</span>
+    </div>
+  `;
+}
+
+function renderTopbarTimer() {
+  const disp = document.getElementById('timer-display');
+  if (disp && state.timer.running) {
+    disp.textContent = formatMs(Date.now() - state.timer.startMs);
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+function renderDashboard() {
+  const todayStart = todayMs();
+  const todayEnd = todayStart + 86400000;
+  const wStart = weekStart(new Date()).getTime();
+  const wEnd = weekEnd(new Date()).getTime();
+
+  const todayEntries = state.entries.filter(e => e.startMs >= todayStart && e.startMs < todayEnd && (e.endMs || state.timer.entryId === e.id));
+  const weekEntries = state.entries.filter(e => e.startMs >= wStart && e.startMs <= wEnd && (e.endMs || state.timer.entryId === e.id));
+
+  const todayMs_ = todayEntries.reduce((sum, e) => sum + entryDuration(e), 0);
+  const weekMs_ = weekEntries.reduce((sum, e) => sum + entryDuration(e), 0);
+
+  document.getElementById('app-content').innerHTML = `
+    <div class="content">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Today</div>
+          <div class="stat-value">${formatDuration(todayMs_)}</div>
+          <div class="stat-sub">${todayEntries.length} entries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">This Week</div>
+          <div class="stat-value">${formatDuration(weekMs_)}</div>
+          <div class="stat-sub">${weekEntries.length} entries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Clients</div>
+          <div class="stat-value">${state.clients.length}</div>
+          <div class="stat-sub">${state.projects.length} projects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Timer</div>
+          <div class="stat-value" style="color:${state.timer.running ? 'var(--green)' : 'var(--text2)'}">${state.timer.running ? 'Running' : 'Stopped'}</div>
+        </div>
+      </div>
+      <div class="empty-state" style="margin-top:40px">
+        <div class="empty-icon">👋</div>
+        <h3>Welcome to ${customization.companyName || 'Client Time Tracker'}</h3>
+        <p>Start by adding clients, projects, and tracking time using the menu on the left.</p>
+      </div>
+    </div>
+  `;
+}
+
+// ── TRACKER ──────────────────────────────────────────────
+let trackerWeekOffset = 0;
+
+function renderTracker() {
+  const base = new Date();
+  base.setDate(base.getDate() + trackerWeekOffset * 7);
+  const ws = weekStart(base);
+  const we = weekEnd(base);
+
+  const entries = state.entries
+    .filter(e => {
+      const active = e.endMs || (state.timer.running && e.id === state.timer.entryId);
+      return active && e.startMs >= ws.getTime() && e.startMs <= we.getTime();
+    })
+    .sort((a, b) => b.startMs - a.startMs);
+
+  const grouped = {};
+  entries.forEach(e => {
+    const d = new Date(e.startMs);
+    d.setHours(0,0,0,0);
+    const key = d.getTime();
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(e);
+  });
+
+  const days = Object.keys(grouped).sort((a,b) => b-a);
+  const wsLabel = ws.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  const weLabel = we.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+  document.getElementById('app-content').innerHTML = `
+    <div class="content">
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+        <button class="date-nav-btn" onclick="trackerWeekOffset--;renderTracker()" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+        <span style="font-size:14px;font-weight:600">${wsLabel} – ${weLabel}</span>
+        <button class="date-nav-btn" onclick="if(trackerWeekOffset<0){trackerWeekOffset++;renderTracker()}" ${trackerWeekOffset===0?'disabled style="opacity:.4"':''} style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+        ${trackerWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="trackerWeekOffset=0;renderTracker()">Today</button>`:''}
+      </div>
+      ${days.length === 0 ? `<div class="empty-state"><div class="empty-icon">⏳</div><h3>No entries this week</h3></div>` : days.map(dayKey => {
+        const dayEntries = grouped[dayKey];
+        const dayTotal = dayEntries.reduce((s,e) => s + entryDuration(e), 0);
+        const d = new Date(parseInt(dayKey));
+        return `<div style="margin-bottom:16px"><div style="font-weight:700;color:var(--text2);font-size:12px;text-transform:uppercase;margin-bottom:8px">${d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'short' })} · ${formatDuration(dayTotal)}</div>${dayEntries.map(e => `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:6px;border:1px solid transparent;background:var(--surface)"><span style="width:10px;height:10px;border-radius:50%;background:${clientColor(e.clientId)}"></span><div style="flex:1"><div style="font-size:13.5px;font-weight:500">${e.desc || 'Untitled'}</div><div style="font-size:11.5px;color:var(--text2);margin-top:1px">${entryMetaLine(e)}</div></div><div style="font-size:12px;color:var(--text2)">${formatTime(e.startMs)}</div><div style="font-weight:700;font-size:14px">${formatDuration(entryDuration(e))}</div></div>`).join('')}</div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ── CLIENTS ──────────────────────────────────────────────
+function renderClients() {
+  document.getElementById('app-content').innerHTML = `
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title">Clients</span>
+        <button class="btn btn-primary btn-sm" onclick="openClientModal()">+ New Client</button>
+      </div>
+      ${state.clients.length === 0 ? `<div class="empty-state"><div class="empty-icon">🏢</div><h3>No clients yet</h3></div>` :
+        `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">${state.clients.map(c => {
+          const projCount = state.projects.filter(p => p.clientId === c.id).length;
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <span style="width:16px;height:16px;border-radius:50%;background:${c.color}"></span>
+              <span style="font-size:15px;font-weight:700">${c.name}</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2)">Projects: ${projCount}</div>
+          </div>`;
+        }).join('')}</div>`}
+    </div>
+  `;
+}
+
+function openClientModal(id) {
+  const c = id ? state.clients.find(cl=>cl.id===id) : null;
+  openModal('client-modal', `${c?'Edit':'New'} Client`, `
+    <div class="form-group">
+      <label>Name</label>
+      <input id="cl-name" type="text" placeholder="Client name" value="${c?.name||''}">
+    </div>
+  `, () => saveClient(id));
+}
+
+function saveClient(existingId) {
+  const name = document.getElementById('cl-name')?.value.trim();
+  if (!name) return alert('Client name is required.');
+  const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+  if (existingId) {
+    const c = state.clients.find(cl=>cl.id===existingId);
+    if (c) Object.assign(c, { name });
+  } else {
+    state.clients.push({ id: uid(), name, color });
+  }
+  save(); closeModal(); renderClients();
+}
+
+// ── PROJECTS ─────────────────────────────────────────────
+function renderProjects() {
+  document.getElementById('app-content').innerHTML = `
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title">Projects</span>
+        <button class="btn btn-primary btn-sm" onclick="openProjectModal()">+ New Project</button>
+      </div>
+      ${state.projects.length === 0 ? `<div class="empty-state"><div class="empty-icon">📁</div><h3>No projects yet</h3></div>` :
+        `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">${state.projects.map(p => {
+          const client = p.clientId ? getClient(p.clientId) : null;
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <span style="width:16px;height:16px;border-radius:50%;background:${p.color}"></span>
+              <span style="font-size:15px;font-weight:700">${p.name}</span>
+            </div>
+            ${client ? `<div style="font-size:12px;color:var(--text2);margin-bottom:6px">${client.name}</div>` : ''}
+          </div>`;
+        }).join('')}</div>`}
+    </div>
+  `;
+}
+
+function openProjectModal(id) {
+  const p = id ? state.projects.find(pr=>pr.id===id) : null;
+  openModal('project-modal', `${p?'Edit':'New'} Project`, `
+    <div class="form-group">
+      <label>Name</label>
+      <input id="pr-name" type="text" placeholder="Project name" value="${p?.name||''}">
+    </div>
+    <div class="form-group">
+      <label>Client</label>
+      <select id="pr-client">
+        <option value="">No Client</option>
+        ${state.clients.map(c=>`<option value="${c.id}" ${p?.clientId===c.id?'selected':''}>${c.name}</option>`).join('')}
+      </select>
+    </div>
+  `, () => saveProject(id));
+}
+
+function saveProject(existingId) {
+  const name = document.getElementById('pr-name')?.value.trim();
+  if (!name) return alert('Project name is required.');
+  const clientId = document.getElementById('pr-client')?.value || null;
+  const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+  if (existingId) {
+    const p = state.projects.find(pr=>pr.id===existingId);
+    if (p) Object.assign(p, { name, clientId });
+  } else {
+    state.projects.push({ id: uid(), name, clientId, color });
+  }
+  save(); closeModal(); renderProjects();
+}
+
+// ── TASKS ─────────────────────────────────────────────────
+function renderTasksPage() {
+  document.getElementById('app-content').innerHTML = `
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title">Tasks</span>
+        <button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ New Task</button>
+      </div>
+      ${state.tasks.length === 0 ? `<div class="empty-state"><div class="empty-icon">✅</div><h3>No tasks yet</h3></div>` :
+        `<div class="card"><table style="width:100%;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Task</th><th style="text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Project</th><th style="text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Client</th></tr></thead>
+          <tbody>
+            ${state.tasks.map(t => {
+              const proj = t.projectId ? getProject(t.projectId) : null;
+              const client = proj?.clientId ? getClient(proj.clientId) : null;
+              return `<tr style="border-bottom:1px solid var(--border)"><td style="text-align:left;padding:10px 14px"><strong>${t.name}</strong></td><td style="text-align:left;padding:10px 14px">${proj ? proj.name : '—'}</td><td style="text-align:left;padding:10px 14px">${client ? client.name : '—'}</td></tr>`;
+            }).join('')}
+          </tbody>
+        </table></div>`}
+    </div>
+  `;
+}
+
+function openTaskModal(id) {
+  const t = id ? state.tasks.find(tk=>tk.id===id) : null;
+  openModal('task-modal', `${t?'Edit':'New'} Task`, `
+    <div class="form-group">
+      <label>Name</label>
+      <input id="tk-name" type="text" placeholder="Task name" value="${t?.name||''}">
+    </div>
+    <div class="form-group">
+      <label>Project</label>
+      <select id="tk-project">
+        <option value="">No Project</option>
+        ${state.projects.map(p=>`<option value="${p.id}" ${t?.projectId===p.id?'selected':''}>${p.name}</option>`).join('')}
+      </select>
+    </div>
+  `, () => saveTask(id));
+}
+
+function saveTask(existingId) {
+  const name = document.getElementById('tk-name')?.value.trim();
+  if (!name) return alert('Task name is required.');
+  const projectId = document.getElementById('tk-project')?.value || null;
+  if (existingId) {
+    const t = state.tasks.find(tk=>tk.id===existingId);
+    if (t) Object.assign(t, { name, projectId });
+  } else {
+    state.tasks.push({ id: uid(), name, projectId });
+  }
+  save(); closeModal(); renderTasksPage();
+}
+
+// ── MODALS ─────────────────────────────────────────────────
+function openModal(id, title, body, onSave) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = `${id}-overlay`;
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h3>${title}</h3>
+        <button onclick="closeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2)">×</button>
+      </div>
+      <div class="modal-body">${body}</div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="${onSave ? onSave.name : 'closeModal()'}()">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
+}
+
+// ── THEME ──────────────────────────────────────────────────
+function toggleTheme() {
+  state.theme = state.theme === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  const label = document.getElementById('theme-label');
+  if (label) label.textContent = state.theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+  save();
+}
+
+// ── SHELL ──────────────────────────────────────────────────
+function buildShell() {
+  document.body.innerHTML = `
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-mark">⏱</div>
+          <img class="logo-image" alt="logo" style="display:none">
+          <div>
+            <div class="logo-text">Client Time Tracker</div>
+            <div class="logo-sub">Time tracking</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-label">Overview</div>
+            <div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard')"><span class="icon">📊</span> Dashboard</div>
+            <div class="nav-item" data-view="tracker" onclick="navigate('tracker')"><span class="icon">⏱</span> Time Tracker</div>
+          </div>
+          <div class="nav-section">
+            <div class="nav-label">Manage</div>
+            <div class="nav-item" data-view="clients" onclick="navigate('clients')"><span class="icon">🏢</span> Clients</div>
+            <div class="nav-item" data-view="projects" onclick="navigate('projects')"><span class="icon">📁</span> Projects</div>
+            <div class="nav-item" data-view="tasks" onclick="navigate('tasks')"><span class="icon">✓</span> Tasks</div>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="footer-button" onclick="exportData()"><span style="font-size:16px">⬇️</span> Export</button>
+          <button class="footer-button" onclick="importData()"><span style="font-size:16px">⬆️</span> Import</button>
+          <button class="footer-button" onclick="openSettings()"><span style="font-size:16px">⚙️</span> Settings</button>
+          <div class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-label">🌙 Dark Mode</span>
+          </div>
+        </div>
+      </aside>
+      <div class="main">
+        <header class="topbar" id="topbar"></header>
+        <div id="app-content"></div>
+      </div>
+    </div>
+  `;
+}
+
+// ── INIT ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+  document.documentElement.setAttribute('data-theme', state.theme);
+  buildShell();
+  updateBranding();
+  const themeLabel = document.getElementById('theme-label');
+  if (themeLabel) themeLabel.textContent = state.theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+  renderTopbar();
+  navigate('dashboard');
+  if (state.timer.running) startTimerInterval();
+});
+  </script>
+</body>
+</html>
