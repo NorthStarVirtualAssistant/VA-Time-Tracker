@@ -1231,7 +1231,7 @@ function exportToPDF() {
     openUpgradeModal();
     return;
   }
-  alert('PDF export coming soon! Premium feature.');
+  alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
 }
 
 function emailReport() {
@@ -1239,7 +1239,7 @@ function emailReport() {
     openUpgradeModal();
     return;
   }
-  alert('Email report coming soon! Premium feature.');
+  alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
 }
 
 function renderReports() {
@@ -1292,8 +1292,8 @@ function renderReports() {
 
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="exportToCSV()" style="background:var(--green);color:white;border:none;cursor:pointer">📊 CSV Export</button>
-        <button class="btn btn-sm" onclick="exportToPDF()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Premium feature"':''}>📄 PDF Export</button>
-        <button class="btn btn-sm" onclick="emailReport()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Premium feature"':''}>✉️ Email Report</button>
+        <button class="btn btn-sm" onclick="exportToPDF()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features"':''}>📄 PDF Export</button>
+        <button class="btn btn-sm" onclick="emailReport()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features"':''}>✉️ Email Report</button>
       </div>
 
       <div class="stat-grid">
@@ -1360,7 +1360,7 @@ function renderReports() {
       </div>
       ` : ''}
 
-      ${entries.length === 0 ? `<div class="empty-state" style="margin-top:40px"><div class="empty-icon">📊</div><h3>No entries this ${reportLabel.toLowerCase()}</h3><p>Start tracking time to see your ${reportLabel.toLowerCase()} report.</p></div>` : ''}
+      ${entries.length === 0 ? `<div class="empty-state" style="margin-top:40px"><div class="empty-icon">📊</div><h3>No entries this ${reportMode === 'weekly' ? 'week' : 'month'}</h3><p>Start tracking time to see your ${reportLabel.toLowerCase()} report.</p></div>` : ''}
     </div>
   `;
 }
