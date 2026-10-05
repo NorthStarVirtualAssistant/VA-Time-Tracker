@@ -1299,10 +1299,10 @@ function renderReports() {
           <button class="date-nav-btn" onclick="if(reportWeekOffset<0){reportWeekOffset++;renderReports()}" ${reportWeekOffset===0?'disabled style="opacity:.4"':''} style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
           ${reportWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;renderReports()">This ${reportMode === 'weekly' ? 'week' : 'month'}</button>`:''}
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn ${reportMode==='weekly'?'btn-primary':'btn-ghost'} btn-sm" onclick="reportMode='weekly';reportWeekOffset=0;renderReports()">Weekly</button>
-          <button class="btn ${reportMode==='monthly'?'btn-primary':'btn-ghost'} btn-sm" onclick="reportMode='monthly';reportWeekOffset=0;renderReports()">Monthly</button>
-        </div>
+        <select onchange="reportMode=this.value;reportWeekOffset=0;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+          <option value="weekly" ${reportMode==='weekly'?'selected':''}>Weekly</option>
+          <option value="monthly" ${reportMode==='monthly'?'selected':''}>Monthly</option>
+        </select>
       </div>
 
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
