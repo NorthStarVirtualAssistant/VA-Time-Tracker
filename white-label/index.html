@@ -652,7 +652,7 @@ function openSettings() {
         </div>
       </div>
     </div>
-  `, () => saveSettings());
+  `, 'saveSettings');
 }
 
 function handleLogoUpload(event) {
@@ -973,7 +973,7 @@ function openModal(id, title, body, onSave) {
       <div class="modal-body">${body}</div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="${onSave ? onSave.name : 'closeModal()'}()">Save</button>
+        <button class="btn btn-primary" onclick="${onSave || 'closeModal'}()">Save</button>
       </div>
     </div>
   `;
