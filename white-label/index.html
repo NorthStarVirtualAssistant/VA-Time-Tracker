@@ -1208,6 +1208,8 @@ function saveProject(existingId) {
 let reportWeekOffset = 0;
 let reportMode = 'weekly';
 let reportGroupBy = 'client';
+let reportClientFilter = null;
+let reportProjectFilter = null;
 
 function exportToCSV() {
   const base = new Date();
@@ -1269,7 +1271,14 @@ function renderReports() {
   const ws = reportMode === 'weekly' ? weekStart(base) : monthStart(base);
   const we = reportMode === 'weekly' ? weekEnd(base) : monthEnd(base);
 
-  const entries = state.entries.filter(e => e.endMs && e.startMs >= ws.getTime() && e.startMs <= we.getTime());
+  let entries = state.entries.filter(e => e.endMs && e.startMs >= ws.getTime() && e.startMs <= we.getTime());
+
+  if (reportClientFilter) {
+    entries = entries.filter(e => e.clientId === reportClientFilter);
+  }
+  if (reportProjectFilter) {
+    entries = entries.filter(e => e.projectId === reportProjectFilter);
+  }
 
   const byGroup = {};
 
@@ -1312,6 +1321,14 @@ function renderReports() {
           <option value="client" ${reportGroupBy==='client'?'selected':''}>Group by Client</option>
           <option value="project" ${reportGroupBy==='project'?'selected':''}>Group by Project</option>
           <option value="task" ${reportGroupBy==='task'?'selected':''}>Group by Task</option>
+        </select>
+        <select onchange="reportClientFilter=this.value||null;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+          <option value="">All Clients</option>
+          ${state.clients.map(c => `<option value="${c.id}" ${reportClientFilter===c.id?'selected':''}>${c.firstName} ${c.lastName}</option>`).join('')}
+        </select>
+        <select onchange="reportProjectFilter=this.value||null;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+          <option value="">All Projects</option>
+          ${state.projects.map(p => `<option value="${p.id}" ${reportProjectFilter===p.id?'selected':''}>${p.name}</option>`).join('')}
         </select>
         <button class="btn btn-sm" onclick="exportToCSV()" style="background:var(--green);color:white;border:none;cursor:pointer">📊 CSV Export</button>
         <button class="btn btn-sm" onclick="exportToPDF()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features"':''}>📄 PDF Export</button>
