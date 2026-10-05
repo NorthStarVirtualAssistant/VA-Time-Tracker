@@ -1228,18 +1228,18 @@ function exportToCSV() {
 
 function exportToPDF() {
   if (!state.isPremium) {
-    openUpgradeModal();
+    alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
     return;
   }
-  alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
+  alert('PDF export coming soon!');
 }
 
 function emailReport() {
   if (!state.isPremium) {
-    openUpgradeModal();
+    alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
     return;
   }
-  alert('Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features');
+  alert('Email report coming soon!');
 }
 
 function renderReports() {
