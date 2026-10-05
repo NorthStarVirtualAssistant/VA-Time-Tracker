@@ -235,14 +235,16 @@
       font-weight: 600;
       transition: opacity .15s, transform .1s;
       white-space: nowrap;
+      background: var(--primary);
+      color: white;
     }
     .btn:hover { opacity: .88; }
     .btn:active { transform: scale(.97); }
     .btn-primary { background: var(--primary); color: white; }
-    .btn-green { background: var(--green); color: white; }
-    .btn-red { background: var(--red); color: white; }
-    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
-    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-green { background: var(--primary); color: white; }
+    .btn-red { background: var(--primary); color: white; }
+    .btn-ghost { background: var(--primary); border: 1px solid var(--primary); color: white; }
+    .btn-ghost:hover { opacity: .88; }
     .btn-sm { height: 30px; padding: 0 10px; font-size: 12px; }
 
     .stat-grid {
@@ -640,10 +642,10 @@ function quickTimerHTML() {
         </div>
       </div>
       <div style="display:flex;gap:12px">
-        <button class="btn ${running ? 'btn-red' : 'btn-green'}" onclick="${running ? 'timerStop();renderTracker()' : 'quickTimerStart()'}" style="flex:1;justify-content:center">
+        <button class="btn" onclick="${running ? 'timerStop();renderTracker()' : 'quickTimerStart()'}" style="flex:1;justify-content:center;background:${running ? 'var(--red)' : 'var(--green)'};color:white">
           ${running ? '⏹ Stop Timer' : '▶ Start Timer'}
         </button>
-        <button class="btn btn-ghost" onclick="openManualEntry()">+ Manual Entry</button>
+        <button class="btn" onclick="openManualEntry()">+ Manual Entry</button>
       </div>
     </div>
   `;
@@ -1330,7 +1332,7 @@ function renderReports() {
           <option value="">All Projects</option>
           ${state.projects.map(p => `<option value="${p.id}" ${reportProjectFilter===p.id?'selected':''}>${p.name}</option>`).join('')}
         </select>
-        <button class="btn btn-sm" onclick="exportToCSV()" style="background:var(--green);color:white;border:none;cursor:pointer">📊 CSV Export</button>
+        <button class="btn btn-sm" onclick="exportToCSV()">📊 CSV Export</button>
         <button class="btn btn-sm" onclick="exportToPDF()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features"':''}>📄 PDF Export</button>
         <button class="btn btn-sm" onclick="emailReport()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Free tier limited to CSV download report only. Upgrade for unlimited clients, PDF export, Email report and more Premium features"':''}>✉️ Email Report</button>
       </div>
