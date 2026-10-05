@@ -1380,7 +1380,50 @@ function renderReports() {
       </div>
       ` : ''}
 
-      ${entries.length === 0 ? `<div class="empty-state" style="margin-top:40px"><div class="empty-icon">📊</div><h3>No entries this ${reportMode === 'weekly' ? 'week' : 'month'}</h3><p>Start tracking time to see your ${reportLabel.toLowerCase()} report.</p></div>` : ''}
+      ${entries.length > 0 ? `
+      <div class="card" style="margin-top:24px;overflow-x:auto">
+        <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
+          <span style="font-size:14px;font-weight:700">Detailed Entries</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);background:var(--surface2)">
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">DATE</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">DESCRIPTION</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">CLIENT</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">PROJECT</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">TASK</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">START</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">END</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:10px">DURATION</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${entries.map(e => {
+              const d = new Date(e.startMs);
+              const dateStr = d.getDate().toString().padStart(2,'0') + ' ' + (d.getMonth()+1).toString().padStart(2,'0') + ' ' + d.getFullYear();
+              const h = d.getHours().toString().padStart(2,'0');
+              const mn = d.getMinutes().toString().padStart(2,'0');
+              const startStr = h + ':' + mn;
+              const ed = new Date(e.endMs);
+              const eh = ed.getHours().toString().padStart(2,'0');
+              const emn = ed.getMinutes().toString().padStart(2,'0');
+              const endStr = eh + ':' + emn;
+              return `<tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:10px 14px">${dateStr}</td>
+                <td style="padding:10px 14px">${e.description || '—'}</td>
+                <td style="padding:10px 14px">${e.clientId ? clientName(e.clientId) : '—'}</td>
+                <td style="padding:10px 14px">${e.projectId ? projectName(e.projectId) : '—'}</td>
+                <td style="padding:10px 14px">${e.taskId ? taskName(e.taskId) : '—'}</td>
+                <td style="padding:10px 14px">${startStr}</td>
+                <td style="padding:10px 14px">${endStr}</td>
+                <td style="padding:10px 14px">${formatDuration(entryDuration(e))}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      ` : `<div class="empty-state" style="margin-top:40px"><div class="empty-icon">📊</div><h3>No entries this ${reportMode === 'weekly' ? 'week' : 'month'}</h3><p>Start tracking time to see your ${reportLabel.toLowerCase()} report.</p></div>`}
     </div>
   `;
 }
