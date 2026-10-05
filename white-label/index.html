@@ -297,7 +297,7 @@
 
     .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text2); }
-    .form-group input, .form-group select {
+    .form-group input, .form-group select, .form-group textarea {
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 8px 10px;
@@ -306,8 +306,9 @@
       color: var(--text);
       outline: none;
       transition: border-color .15s;
+      font-family: inherit;
     }
-    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
 
     .logo-preview {
       width: 100%;
@@ -384,7 +385,6 @@
 </head>
 <body>
   <script>
-// ── STATE ──────────────────────────────────────────────────
 const STATE_KEY = 'ctt_timetracker_v1';
 const CUSTOM_KEY = 'ctt_customization';
 
@@ -395,6 +395,7 @@ let state = {
   entries: [],
   timer: { running: false, startMs: null, entryId: null },
   theme: 'light',
+  isPremium: false,
 };
 
 let customization = {
@@ -456,7 +457,6 @@ function updateBranding() {
   }
 }
 
-// ── TIMER ──────────────────────────────────────────────────
 let timerInterval = null;
 
 function timerStart(desc, clientId, projectId, taskId) {
@@ -520,7 +520,6 @@ function entryDuration(e) {
   return 0;
 }
 
-// ── HELPERS ────────────────────────────────────────────────
 function getClient(id) { return state.clients.find(c => c.id === id); }
 function getProject(id) { return state.projects.find(p => p.id === id); }
 function getTask(id) { return state.tasks.find(t => t.id === id); }
@@ -622,21 +621,21 @@ function quickTimerHTML() {
           <label style="font-size:11px;font-weight:600;color:var(--text2)">Client</label>
           <select id="qt-client" ${running?'disabled':''} onchange="updateQTProjects()" style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none">
             <option value="">No Client</option>
-            ${state.clients.map(c=>\`<option value="\${c.id}">\${c.name}</option>\`).join('')}
+            ${state.clients.map(c=>`<option value="${c.id}">${clientName(c.id)}</option>`).join('')}
           </select>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
           <label style="font-size:11px;font-weight:600;color:var(--text2)">Project</label>
           <select id="qt-project" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none">
             <option value="">No Project</option>
-            ${state.projects.map(p=>\`<option value="\${p.id}">\${p.name}</option>\`).join('')}
+            ${state.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
           </select>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
           <label style="font-size:11px;font-weight:600;color:var(--text2)">Task</label>
           <select id="qt-task" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none">
             <option value="">No Task</option>
-            ${state.tasks.map(t=>\`<option value="\${t.id}">\${t.name}</option>\`).join('')}
+            ${state.tasks.map(t=>`<option value="${t.id}">${t.name}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -650,7 +649,6 @@ function quickTimerHTML() {
   `;
 }
 
-// ── QUICK TIMER & MANUAL ENTRY ────────────────────────────
 function quickTimerStart() {
   const desc = document.getElementById('qt-desc')?.value || 'Untitled';
   const clientId = document.getElementById('qt-client')?.value || null;
@@ -678,7 +676,7 @@ function openManualEntry() {
       <label>Client</label>
       <select id="me-client" onchange="updateMEProjects()">
         <option value="">No Client</option>
-        ${state.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+        ${state.clients.map(c=>`<option value="${c.id}">${clientName(c.id)}</option>`).join('')}
       </select>
     </div>
     <div class="form-group">
@@ -786,7 +784,6 @@ function deleteEntry(entryId) {
   renderTracker();
 }
 
-// ── EXPORT/IMPORT ──────────────────────────────────────────
 function exportData() {
   const dataStr = JSON.stringify(state, null, 2);
   const filename = `ctt-backup-${new Date().toISOString().slice(0,10)}.json`;
@@ -823,9 +820,8 @@ function importData() {
   }
 }
 
-// ── SETTINGS/CUSTOMIZATION ──────────────────────────────────
 function openSettings() {
-  openModal('settings-modal', 'Customize Your Branding', `
+  openModal('settings-modal', 'Customise Your Branding', `
     <div class="form-group">
       <label>Company Name</label>
       <input id="set-company-name" type="text" placeholder="Your company name" value="${customization.companyName || ''}">
@@ -852,7 +848,7 @@ function openSettings() {
         </div>
       </div>
     </div>
-  `, 'saveSettings');
+  `, saveSettings);
 }
 
 function handleLogoUpload(event) {
@@ -875,7 +871,6 @@ function saveSettings() {
   alert('Branding updated successfully!');
 }
 
-// ── NAVIGATION ────────────────────────────────────────────
 let currentView = 'dashboard';
 
 function navigate(view) {
@@ -887,15 +882,15 @@ function navigate(view) {
 }
 
 function renderCurrentView() {
+  renderTopbar();
   const views = { dashboard: renderDashboard, tracker: renderTracker, clients: renderClients, projects: renderProjects, tasks: renderTasksPage, reports: renderReports };
   const fn = views[currentView];
   if (fn) fn();
 }
 
-// ── TOPBAR ────────────────────────────────────────────────
 function renderTopbar() {
   const tb = document.getElementById('topbar');
-  const titles = { dashboard: 'Dashboard', tracker: 'Time Tracker', clients: 'Clients', projects: 'Projects', tasks: 'Tasks' };
+  const titles = { dashboard: 'Dashboard', tracker: 'Time Tracker', clients: 'Clients', projects: 'Projects', tasks: 'Tasks', reports: 'Reports' };
   tb.innerHTML = `
     <div class="topbar-left">
       <button class="btn btn-ghost btn-icon" id="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
@@ -914,7 +909,6 @@ function renderTopbarTimer() {
   }
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────
 function renderDashboard() {
   const todayStart = todayMs();
   const todayEnd = todayStart + 86400000;
@@ -976,7 +970,6 @@ function renderDashboard() {
   `;
 }
 
-// ── TRACKER ──────────────────────────────────────────────
 let trackerWeekOffset = 0;
 
 function renderTracker() {
@@ -1033,7 +1026,6 @@ function renderTracker() {
   `;
 }
 
-// ── CLIENTS ──────────────────────────────────────────────
 function renderClients() {
   document.getElementById('app-content').innerHTML = `
     <div class="content">
@@ -1133,7 +1125,6 @@ function saveClient(existingId) {
   save(); closeModal(); renderClients();
 }
 
-// ── PROJECTS ─────────────────────────────────────────────
 function renderProjects() {
   document.getElementById('app-content').innerHTML = `
     <div class="content">
@@ -1149,7 +1140,7 @@ function renderProjects() {
               <span style="width:16px;height:16px;border-radius:50%;background:${p.color}"></span>
               <span style="font-size:15px;font-weight:700">${p.name}</span>
             </div>
-            ${client ? `<div style="font-size:12px;color:var(--text2);margin-bottom:10px">${client.name}</div>` : '<div style="margin-bottom:10px"></div>'}
+            ${client ? `<div style="font-size:12px;color:var(--text2);margin-bottom:10px">${clientName(client.id)}</div>` : '<div style="margin-bottom:10px"></div>'}
             <div style="display:flex;gap:6px">
               <button class="btn btn-ghost btn-sm" onclick="openProjectModal('${p.id}')" title="Edit" style="flex:1;font-size:16px;padding:4px">✏️</button>
               <button class="btn btn-ghost btn-sm" onclick="deleteProject('${p.id}')" title="Delete" style="flex:1;font-size:16px;padding:4px;color:var(--red)">🗑️</button>
@@ -1179,7 +1170,7 @@ function openProjectModal(id) {
       <label>Client</label>
       <select id="pr-client">
         <option value="">No Client</option>
-        ${state.clients.map(c=>`<option value="${c.id}" ${p?.clientId===c.id?'selected':''}>${c.name}</option>`).join('')}
+        ${state.clients.map(c=>`<option value="${c.id}" ${p?.clientId===c.id?'selected':''}>${clientName(c.id)}</option>`).join('')}
       </select>
     </div>
   `, function() { saveProject(id); });
@@ -1199,14 +1190,69 @@ function saveProject(existingId) {
   save(); closeModal(); renderProjects();
 }
 
-// ── REPORTS ───────────────────────────────────────────────
 let reportWeekOffset = 0;
+let reportMode = 'weekly';
+let reportGroupBy = 'client';
+
+function exportToCSV() {
+  const base = new Date();
+  if (reportMode === 'weekly') {
+    base.setDate(base.getDate() + reportWeekOffset * 7);
+  } else {
+    base.setMonth(base.getMonth() + reportWeekOffset);
+  }
+  const start = reportMode === 'weekly' ? weekStart(base).getTime() : monthStart(base).getTime();
+  const end = reportMode === 'weekly' ? weekEnd(base).getTime() : monthEnd(base).getTime();
+  const entries = state.entries.filter(e => e.endMs && e.startMs >= start && e.startMs <= end);
+
+  let csv = 'Date,Time,Description,Client,Project,Task,Duration\n';
+  entries.forEach(e => {
+    const date = new Date(e.startMs).toLocaleDateString('en-GB');
+    const time = formatTime(e.startMs);
+    const duration = formatDuration(entryDuration(e));
+    const client = clientName(e.clientId) || 'N/A';
+    const project = projectName(e.projectId) || 'N/A';
+    const task = taskName(e.taskId) || 'N/A';
+    csv += `${date},${time},"${e.desc}",${client},${project},${task},${duration}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `timesheet-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  alert('CSV exported successfully!');
+}
+
+function exportToPDF() {
+  if (!state.isPremium) {
+    openUpgradeModal();
+    return;
+  }
+  alert('PDF export coming soon! Premium feature.');
+}
+
+function emailReport() {
+  if (!state.isPremium) {
+    openUpgradeModal();
+    return;
+  }
+  alert('Email report coming soon! Premium feature.');
+}
 
 function renderReports() {
   const base = new Date();
-  base.setDate(base.getDate() + reportWeekOffset * 7);
-  const ws = weekStart(base);
-  const we = weekEnd(base);
+  if (reportMode === 'weekly') {
+    base.setDate(base.getDate() + reportWeekOffset * 7);
+  } else {
+    base.setMonth(base.getMonth() + reportWeekOffset);
+  }
+  const start = reportMode === 'weekly' ? weekStart(base).getTime() : monthStart(base).getTime();
+  const end = reportMode === 'weekly' ? weekEnd(base).getTime() : monthEnd(base).getTime();
+  const ws = reportMode === 'weekly' ? weekStart(base) : monthStart(base);
+  const we = reportMode === 'weekly' ? weekEnd(base) : monthEnd(base);
 
   const entries = state.entries.filter(e => e.endMs && e.startMs >= ws.getTime() && e.startMs <= we.getTime());
 
@@ -1227,14 +1273,27 @@ function renderReports() {
 
   const wsLabel = ws.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
   const weLabel = we.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  const reportLabel = reportMode === 'weekly' ? 'Weekly' : 'Monthly';
 
   document.getElementById('app-content').innerHTML = `
     <div class="content">
-      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
-        <button class="date-nav-btn" onclick="reportWeekOffset--;renderReports()" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
-        <span style="font-size:14px;font-weight:600">Weekly Report: ${wsLabel} – ${weLabel}</span>
-        <button class="date-nav-btn" onclick="if(reportWeekOffset<0){reportWeekOffset++;renderReports()}" ${reportWeekOffset===0?'disabled style="opacity:.4"':''} style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
-        ${reportWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;renderReports()">This Week</button>`:''}
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <button class="date-nav-btn" onclick="reportWeekOffset--;renderReports()" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+          <span style="font-size:14px;font-weight:600">${reportLabel} Report: ${wsLabel} – ${weLabel}</span>
+          <button class="date-nav-btn" onclick="if(reportWeekOffset<0){reportWeekOffset++;renderReports()}" ${reportWeekOffset===0?'disabled style="opacity:.4"':''} style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+          ${reportWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;renderReports()">This ${reportLabel}</button>`:''}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ${reportMode==='weekly'?'btn-primary':'btn-ghost'} btn-sm" onclick="reportMode='weekly';reportWeekOffset=0;renderReports()">Weekly</button>
+          <button class="btn ${reportMode==='monthly'?'btn-primary':'btn-ghost'} btn-sm" onclick="reportMode='monthly';reportWeekOffset=0;renderReports()">Monthly</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="exportToCSV()" style="background:var(--green);color:white;border:none;cursor:pointer">📊 CSV Export</button>
+        <button class="btn btn-sm" onclick="exportToPDF()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Premium feature"':''}>📄 PDF Export</button>
+        <button class="btn btn-sm" onclick="emailReport()" style="background:${state.isPremium?'var(--primary)':'var(--text3)'};color:white;border:none;cursor:pointer;opacity:${state.isPremium?'1':'.6'}" ${!state.isPremium?'title="Premium feature"':''}>✉️ Email Report</button>
       </div>
 
       <div class="stat-grid">
@@ -1301,12 +1360,11 @@ function renderReports() {
       </div>
       ` : ''}
 
-      ${entries.length === 0 ? `<div class="empty-state" style="margin-top:40px"><div class="empty-icon">📊</div><h3>No entries this week</h3><p>Start tracking time to see your weekly report.</p></div>` : ''}
+      ${entries.length === 0 ? `<div class="empty-state" style="margin-top:40px"><div class="empty-icon">📊</div><h3>No entries this ${reportLabel.toLowerCase()}</h3><p>Start tracking time to see your ${reportLabel.toLowerCase()} report.</p></div>` : ''}
     </div>
   `;
 }
 
-// ── TASKS ─────────────────────────────────────────────────
 function renderTasksPage() {
   document.getElementById('app-content').innerHTML = `
     <div class="content">
@@ -1321,7 +1379,7 @@ function renderTasksPage() {
             ${state.tasks.map(t => {
               const proj = t.projectId ? getProject(t.projectId) : null;
               const client = proj?.clientId ? getClient(proj.clientId) : null;
-              return `<tr style="border-bottom:1px solid var(--border)"><td style="text-align:left;padding:10px 14px"><strong>${t.name}</strong></td><td style="text-align:left;padding:10px 14px">${proj ? proj.name : '—'}</td><td style="text-align:left;padding:10px 14px">${client ? client.name : '—'}</td><td style="text-align:left;padding:10px 14px"><button class="btn btn-ghost btn-sm" onclick="openTaskModal('${t.id}')" title="Edit" style="font-size:16px;padding:4px 8px;margin-right:4px">✏️</button><button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')" title="Delete" style="font-size:16px;padding:4px 8px;color:var(--red)">🗑️</button></td></tr>`;
+              return `<tr style="border-bottom:1px solid var(--border)"><td style="text-align:left;padding:10px 14px"><strong>${t.name}</strong></td><td style="text-align:left;padding:10px 14px">${proj ? proj.name : '—'}</td><td style="text-align:left;padding:10px 14px">${client ? clientName(client.id) : '—'}</td><td style="text-align:left;padding:10px 14px"><button class="btn btn-ghost btn-sm" onclick="openTaskModal('${t.id}')" title="Edit" style="font-size:16px;padding:4px 8px;margin-right:4px">✏️</button><button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')" title="Delete" style="font-size:16px;padding:4px 8px;color:var(--red)">🗑️</button></td></tr>`;
             }).join('')}
           </tbody>
         </table></div>`}
@@ -1366,7 +1424,6 @@ function saveTask(existingId) {
   save(); closeModal(); renderTasksPage();
 }
 
-// ── MODALS ─────────────────────────────────────────────────
 let currentModalCallback = null;
 
 function openModal(id, title, body, onSave) {
@@ -1403,7 +1460,6 @@ function closeModal() {
   document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
 }
 
-// ── THEME ──────────────────────────────────────────────────
 function toggleTheme() {
   state.theme = state.theme === 'light' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', state.theme);
@@ -1412,7 +1468,6 @@ function toggleTheme() {
   save();
 }
 
-// ── SHELL ──────────────────────────────────────────────────
 function buildShell() {
   document.body.innerHTML = `
     <div class="app-shell">
@@ -1459,7 +1514,6 @@ function buildShell() {
   `;
 }
 
-// ── INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   load();
   document.documentElement.setAttribute('data-theme', state.theme);
