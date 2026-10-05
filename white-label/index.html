@@ -1337,9 +1337,20 @@ function renderReports() {
 
       <div class="stat-grid">
         <div class="stat-card">
-          <div class="stat-label">Total Hours</div>
+          <div class="stat-label">TOTAL HOURS</div>
           <div class="stat-value">${formatDuration(totalMs)}</div>
-          <div class="stat-sub">${entries.length} entries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">HOURS (DEC)</div>
+          <div class="stat-value">${(totalMs / 3600000).toFixed(2)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ENTRIES</div>
+          <div class="stat-value">${entries.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">GROUPS</div>
+          <div class="stat-value">${groupRows.length}</div>
         </div>
       </div>
 
