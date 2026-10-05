@@ -836,7 +836,7 @@ function openClientModal(id) {
       <label>Name</label>
       <input id="cl-name" type="text" placeholder="Client name" value="${c?.name||''}">
     </div>
-  `, () => saveClient(id));
+  `, function() { saveClient(id); });
 }
 
 function saveClient(existingId) {
@@ -889,7 +889,7 @@ function openProjectModal(id) {
         ${state.clients.map(c=>`<option value="${c.id}" ${p?.clientId===c.id?'selected':''}>${c.name}</option>`).join('')}
       </select>
     </div>
-  `, () => saveProject(id));
+  `, function() { saveProject(id); });
 }
 
 function saveProject(existingId) {
@@ -943,7 +943,7 @@ function openTaskModal(id) {
         ${state.projects.map(p=>`<option value="${p.id}" ${t?.projectId===p.id?'selected':''}>${p.name}</option>`).join('')}
       </select>
     </div>
-  `, () => saveTask(id));
+  `, function() { saveTask(id); });
 }
 
 function saveTask(existingId) {
@@ -960,7 +960,10 @@ function saveTask(existingId) {
 }
 
 // ── MODALS ─────────────────────────────────────────────────
+let currentModalCallback = null;
+
 function openModal(id, title, body, onSave) {
+  currentModalCallback = onSave;
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.id = `${id}-overlay`;
@@ -973,7 +976,7 @@ function openModal(id, title, body, onSave) {
       <div class="modal-body">${body}</div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="${onSave || 'closeModal'}()">Save</button>
+        <button class="btn btn-primary" onclick="handleModalSave()">Save</button>
       </div>
     </div>
   `;
@@ -981,7 +984,15 @@ function openModal(id, title, body, onSave) {
   overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
 }
 
+function handleModalSave() {
+  if (currentModalCallback) {
+    currentModalCallback();
+  }
+  closeModal();
+}
+
 function closeModal() {
+  currentModalCallback = null;
   document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
 }
 
