@@ -837,19 +837,6 @@ function openSettings() {
       </div>
       ${customization.logoImage ? `<p style="font-size:11px;color:var(--text2);margin-top:6px">✓ Logo uploaded</p>` : ''}
     </div>
-
-    <div style="margin-top:20px">
-      <p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">PREVIEW</p>
-      <div class="settings-preview">
-        <div class="preview-header">
-          ${customization.logoImage ? `<img class="preview-logo" src="${customization.logoImage}" alt="logo">` : '<div style="width:32px;height:32px;background:linear-gradient(135deg,#2E75B6,#6366f1);border-radius:6px;flex-shrink:0"></div>'}
-          <div>
-            <div class="preview-name">${document.getElementById('set-company-name')?.value || customization.companyName || 'Client Time Tracker'}</div>
-            <div style="font-size:11px;color:var(--text2)">Time tracking application</div>
-          </div>
-        </div>
-      </div>
-    </div>
   `, saveSettings);
 }
 
