@@ -53,11 +53,11 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: Calibri, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.5;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .app-shell { display: flex; min-height: 100vh; }
@@ -108,7 +108,7 @@
       flex-shrink: 0;
     }
 
-    .logo-text { font-weight: 700; font-size: 15px; color: var(--text); }
+    .logo-text { font-weight: 700; font-size: 13px; color: var(--text); }
     .logo-sub { font-size: 11px; color: var(--text2); }
 
     .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
@@ -191,7 +191,7 @@
       z-index: 90;
     }
     .topbar-left { display: flex; align-items: center; gap: 12px; }
-    .page-title { font-size: 17px; font-weight: 700; }
+    .page-title { font-size: 14px; font-weight: 700; }
 
     .timer-bar {
       display: flex;
@@ -260,7 +260,7 @@
       border: 1px solid var(--border);
     }
     .stat-label { font-size: 12px; color: var(--text2); font-weight: 500; text-transform: uppercase; }
-    .stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    .stat-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
 
     .modal-overlay {
       position: fixed; inset: 0;
@@ -287,7 +287,7 @@
       align-items: center;
       justify-content: space-between;
     }
-    .modal-header h3 { font-size: 16px; font-weight: 700; }
+    .modal-header h3 { font-size: 14px; font-weight: 700; }
     .modal-body { padding: 20px; }
     .modal-footer {
       padding: 14px 20px;
@@ -365,11 +365,11 @@
       padding: 48px 20px;
       color: var(--text2);
     }
-    .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
-    .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .section-title { font-size: 16px; font-weight: 700; }
+    .section-title { font-size: 14px; font-weight: 700; }
 
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); transition: transform .2s; }
@@ -597,15 +597,15 @@ function entryRowHTML(e) {
   return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:6px;background:var(--surface2);margin-bottom:8px" data-entry-id="${e.id}">
     <span style="width:10px;height:10px;border-radius:50%;background:${clientColor(e.clientId)};flex-shrink:0"></span>
     <div style="flex:1">
-      <div style="font-size:13px;font-weight:600">${e.desc || 'Untitled'}</div>
-      <div style="font-size:11px;color:var(--text2);margin-top:2px">${entryMetaLine(e)}</div>
+      <div style="font-size:12px;font-weight:600">${e.desc || 'Untitled'}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px">${entryMetaLine(e)}</div>
     </div>
     <div style="text-align:right">
       <div style="font-size:12px;color:var(--text2)">${formatTime(e.startMs)}</div>
-      <div style="font-weight:700;font-size:13px;margin-top:2px" class="entry-duration">${formatDuration(entryDuration(e))}</div>
+      <div style="font-weight:700;font-size:12px;margin-top:2px" class="entry-duration">${formatDuration(entryDuration(e))}</div>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="openEntryModal('${e.id}')" style="padding:4px 8px;font-size:11px">Edit</button>
-    <button class="btn btn-ghost btn-sm" onclick="deleteEntry('${e.id}')" style="padding:4px 8px;font-size:11px;color:var(--red)">Delete</button>
+    <button class="btn btn-ghost btn-sm" onclick="deleteEntry('${e.id}')" style="padding:4px 8px;font-size:10px;color:var(--red)">Delete</button>
   </div>`;
 }
 
@@ -616,26 +616,26 @@ function quickTimerHTML() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:12px">
         <div style="display:flex;flex-direction:column;gap:4px">
-          <label style="font-size:11px;font-weight:600;color:var(--text2)">Description</label>
-          <input id="qt-desc" type="text" placeholder="What are you working on?" value="${running ? (runEntry?.desc||'') : ''}" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none">
+          <label style="font-size:10px;font-weight:600;color:var(--text2)">Description</label>
+          <input id="qt-desc" type="text" placeholder="What are you working on?" value="${running ? (runEntry?.desc||'') : ''}" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;background:var(--surface);color:var(--text);outline:none">
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
-          <label style="font-size:11px;font-weight:600;color:var(--text2)">Client</label>
-          <select id="qt-client" ${running?'disabled':''} onchange="updateQTProjects()" style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none">
+          <label style="font-size:10px;font-weight:600;color:var(--text2)">Client</label>
+          <select id="qt-client" ${running?'disabled':''} onchange="updateQTProjects()" style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;background:var(--surface);color:var(--text);outline:none">
             <option value="">No Client</option>
             ${state.clients.map(c=>`<option value="${c.id}">${clientName(c.id)}</option>`).join('')}
           </select>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
-          <label style="font-size:11px;font-weight:600;color:var(--text2)">Project</label>
-          <select id="qt-project" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none">
+          <label style="font-size:10px;font-weight:600;color:var(--text2)">Project</label>
+          <select id="qt-project" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;background:var(--surface);color:var(--text);outline:none">
             <option value="">No Project</option>
             ${state.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
           </select>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
-          <label style="font-size:11px;font-weight:600;color:var(--text2)">Task</label>
-          <select id="qt-task" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none">
+          <label style="font-size:10px;font-weight:600;color:var(--text2)">Task</label>
+          <select id="qt-task" ${running?'disabled':''} style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;background:var(--surface);color:var(--text);outline:none">
             <option value="">No Task</option>
             ${state.tasks.map(t=>`<option value="${t.id}">${t.name}</option>`).join('')}
           </select>
@@ -835,7 +835,7 @@ function openSettings() {
         <button class="btn btn-ghost" onclick="document.getElementById('logo-file-input').click()">Upload Logo</button>
         <input id="logo-file-input" type="file" accept="image/*" onchange="handleLogoUpload(event)">
       </div>
-      ${customization.logoImage ? `<p style="font-size:11px;color:var(--text2);margin-top:6px">✓ Logo uploaded</p>` : ''}
+      ${customization.logoImage ? `<p style="font-size:10px;color:var(--text2);margin-top:6px">✓ Logo uploaded</p>` : ''}
     </div>
   `, saveSettings);
 }
@@ -943,7 +943,7 @@ function renderDashboard() {
       ${recent.length > 0 ? `
       <div class="card" style="margin-top:24px">
         <div style="padding:16px 18px; border-bottom:1px solid var(--border); display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:16px;font-weight:700">Recent Entries</span>
+          <span style="font-size:12px;font-weight:700">Recent Entries</span>
           <button class="btn btn-ghost btn-sm" onclick="navigate('tracker')">View All</button>
         </div>
         <div style="padding:10px 8px">
@@ -993,7 +993,7 @@ function renderTracker() {
 
       <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
         <button class="date-nav-btn" onclick="trackerWeekOffset--;renderTracker()" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
-        <span style="font-size:14px;font-weight:600">${wsLabel} – ${weLabel}</span>
+        <span style="font-size:12px;font-weight:600">${wsLabel} – ${weLabel}</span>
         <button class="date-nav-btn" onclick="if(trackerWeekOffset<0){trackerWeekOffset++;renderTracker()}" ${trackerWeekOffset===0?'disabled style="opacity:.4"':''} style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
         ${trackerWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="trackerWeekOffset=0;renderTracker()">Today</button>`:''}
       </div>
@@ -1030,16 +1030,16 @@ function renderClients() {
             <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px">
               <span style="width:16px;height:16px;border-radius:50%;background:${c.color};flex-shrink:0;margin-top:2px"></span>
               <div style="flex:1;min-width:0">
-                ${fullName ? `<div style="font-size:15px;font-weight:700;margin-bottom:2px">${fullName}</div>` : ''}
-                ${c.companyName ? `<div style="font-size:13px;color:var(--text2);margin-bottom:4px">${c.companyName}</div>` : ''}
+                ${fullName ? `<div style="font-size:12px;font-weight:700;margin-bottom:2px">${fullName}</div>` : ''}
+                ${c.companyName ? `<div style="font-size:12px;color:var(--text2);margin-bottom:4px">${c.companyName}</div>` : ''}
                 ${c.email ? `<div style="font-size:12px;color:var(--text2);margin-bottom:2px;word-break:break-all">${c.email}</div>` : ''}
               </div>
             </div>
-            ${c.notes ? `<div style="font-size:11px;color:var(--text2);background:var(--surface2);padding:8px;border-radius:6px;margin-bottom:10px;max-height:60px;overflow:hidden">${c.notes}</div>` : ''}
+            ${c.notes ? `<div style="font-size:10px;color:var(--text2);background:var(--surface2);padding:8px;border-radius:6px;margin-bottom:10px;max-height:60px;overflow:hidden">${c.notes}</div>` : ''}
             <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Projects: ${projCount}</div>
             <div style="display:flex;gap:6px">
-              <button class="btn btn-ghost btn-sm" onclick="openClientModal('${c.id}')" title="Edit" style="flex:1;font-size:16px;padding:4px">✏️</button>
-              <button class="btn btn-ghost btn-sm" onclick="deleteClient('${c.id}')" title="Delete" style="flex:1;font-size:16px;padding:4px;color:var(--red)">🗑️</button>
+              <button class="btn btn-ghost btn-sm" onclick="openClientModal('${c.id}')" title="Edit" style="flex:1;font-size:14px;padding:4px">✏️</button>
+              <button class="btn btn-ghost btn-sm" onclick="deleteClient('${c.id}')" title="Delete" style="flex:1;font-size:14px;padding:4px;color:var(--red)">🗑️</button>
             </div>
           </div>`;
         }).join('')}</div>`}
@@ -1058,10 +1058,10 @@ function deleteClient(clientId) {
 function openUpgradeModal() {
   openModal('upgrade-modal', 'Upgrade to Premium', `
     <div style="text-align:center;padding:20px">
-      <div style="font-size:48px;margin-bottom:16px">⭐️</div>
-      <p style="font-size:16px;font-weight:600;margin-bottom:8px">Free tier limited to 3 clients</p>
+      <div style="font-size:42px;margin-bottom:16px">⭐️</div>
+      <p style="font-size:12px;font-weight:600;margin-bottom:8px">Free tier limited to 3 clients</p>
       <p style="color:var(--text2);margin-bottom:24px">Upgrade for unlimited clients and unlock premium features!</p>
-      <p style="font-size:13px;color:var(--text2)">Premium: £42 one-time purchase</p>
+      <p style="font-size:12px;color:var(--text2)">Premium: £42 one-time purchase</p>
     </div>
   `, null);
 }
@@ -1074,9 +1074,9 @@ function openUpgradeModalForFeature(featureName) {
   const feature = featureMessages[featureName];
   openModal('upgrade-feature-modal', 'Upgrade to Premium', `
     <div style="text-align:center;padding:20px">
-      <div style="font-size:48px;margin-bottom:16px">⭐️</div>
-      <p style="font-size:16px;font-weight:600;margin-bottom:8px">${feature.description}</p>
-      <p style="font-size:13px;color:var(--text2);margin-top:24px">Premium: £42 one-time purchase</p>
+      <div style="font-size:42px;margin-bottom:16px">⭐️</div>
+      <p style="font-size:12px;font-weight:600;margin-bottom:8px">${feature.description}</p>
+      <p style="font-size:12px;color:var(--text2);margin-top:24px">Premium: £42 one-time purchase</p>
     </div>
   `, null);
 }
@@ -1142,12 +1142,12 @@ function renderProjects() {
           return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
               <span style="width:16px;height:16px;border-radius:50%;background:${p.color}"></span>
-              <span style="font-size:15px;font-weight:700">${p.name}</span>
+              <span style="font-size:13px;font-weight:700">${p.name}</span>
             </div>
             ${client ? `<div style="font-size:12px;color:var(--text2);margin-bottom:10px">${clientName(client.id)}</div>` : '<div style="margin-bottom:10px"></div>'}
             <div style="display:flex;gap:6px">
-              <button class="btn btn-ghost btn-sm" onclick="openProjectModal('${p.id}')" title="Edit" style="flex:1;font-size:16px;padding:4px">✏️</button>
-              <button class="btn btn-ghost btn-sm" onclick="deleteProject('${p.id}')" title="Delete" style="flex:1;font-size:16px;padding:4px;color:var(--red)">🗑️</button>
+              <button class="btn btn-ghost btn-sm" onclick="openProjectModal('${p.id}')" title="Edit" style="flex:1;font-size:14px;padding:4px">✏️</button>
+              <button class="btn btn-ghost btn-sm" onclick="deleteProject('${p.id}')" title="Delete" style="flex:1;font-size:14px;padding:4px;color:var(--red)">🗑️</button>
             </div>
           </div>`;
         }).join('')}</div>`}
@@ -1295,27 +1295,27 @@ function renderReports() {
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between">
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <button class="date-nav-btn" onclick="reportWeekOffset--;renderReports()" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
-          <span style="font-size:14px;font-weight:600">${reportLabel} Report: ${wsLabel} – ${weLabel}</span>
+          <span style="font-size:12px;font-weight:600">${reportLabel} Report: ${wsLabel} – ${weLabel}</span>
           <button class="date-nav-btn" onclick="if(reportWeekOffset<0){reportWeekOffset++;renderReports()}" ${reportWeekOffset===0?'disabled style="opacity:.4"':''} style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
           ${reportWeekOffset!==0?`<button class="btn btn-ghost btn-sm" onclick="reportWeekOffset=0;renderReports()">This ${reportMode === 'weekly' ? 'week' : 'month'}</button>`:''}
         </div>
-        <select onchange="reportMode=this.value;reportWeekOffset=0;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+        <select onchange="reportMode=this.value;reportWeekOffset=0;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">
           <option value="weekly" ${reportMode==='weekly'?'selected':''}>Weekly</option>
           <option value="monthly" ${reportMode==='monthly'?'selected':''}>Monthly</option>
         </select>
       </div>
 
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-        <select onchange="reportGroupBy=this.value;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+        <select onchange="reportGroupBy=this.value;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">
           <option value="client" ${reportGroupBy==='client'?'selected':''}>Group by Client</option>
           <option value="project" ${reportGroupBy==='project'?'selected':''}>Group by Project</option>
           <option value="task" ${reportGroupBy==='task'?'selected':''}>Group by Task</option>
         </select>
-        <select onchange="reportClientFilter=this.value||null;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+        <select onchange="reportClientFilter=this.value||null;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">
           <option value="">All Clients</option>
           ${state.clients.map(c => `<option value="${c.id}" ${reportClientFilter===c.id?'selected':''}>${c.firstName} ${c.lastName}</option>`).join('')}
         </select>
-        <select onchange="reportProjectFilter=this.value||null;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">
+        <select onchange="reportProjectFilter=this.value||null;renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">
           <option value="">All Projects</option>
           ${state.projects.map(p => `<option value="${p.id}" ${reportProjectFilter===p.id?'selected':''}>${p.name}</option>`).join('')}
         </select>
@@ -1346,7 +1346,7 @@ function renderReports() {
       ${groupRows.length > 0 ? `
       <div class="card">
         <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
-          <span style="font-size:16px;font-weight:700">Time by ${reportGroupBy === 'client' ? 'Client' : reportGroupBy === 'project' ? 'Project' : 'Task'}</span>
+          <span style="font-size:12px;font-weight:700">Time by ${reportGroupBy === 'client' ? 'Client' : reportGroupBy === 'project' ? 'Project' : 'Task'}</span>
         </div>
         <div style="padding:16px 18px">
           ${groupRows.map(([gid, ms]) => {
@@ -1373,7 +1373,7 @@ function renderReports() {
               <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
                 <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .3s"></div>
               </div>
-              <div style="font-size:11px;color:var(--text2);margin-top:4px">${pct}% of total time</div>
+              <div style="font-size:10px;color:var(--text2);margin-top:4px">${pct}% of total time</div>
             </div>`;
           }).join('')}
         </div>
@@ -1383,7 +1383,7 @@ function renderReports() {
       ${entries.length > 0 ? `
       <div class="card" style="margin-top:24px;overflow-x:auto">
         <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
-          <span style="font-size:14px;font-weight:700">Detailed Entries</span>
+          <span style="font-size:12px;font-weight:700">Detailed Entries</span>
         </div>
         <table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead>
@@ -1441,12 +1441,12 @@ function renderTasksPage() {
       </div>
       ${state.tasks.length === 0 ? `<div class="empty-state"><div class="empty-icon">✅</div><h3>No tasks yet</h3></div>` :
         `<div class="card"><table style="width:100%;border-collapse:collapse">
-          <thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Task</th><th style="text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Project</th><th style="text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Client</th><th style="text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Actions</th></tr></thead>
+          <thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:10px 14px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase">Task</th><th style="text-align:left;padding:10px 14px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase">Project</th><th style="text-align:left;padding:10px 14px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase">Client</th><th style="text-align:left;padding:10px 14px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase">Actions</th></tr></thead>
           <tbody>
             ${state.tasks.map(t => {
               const proj = t.projectId ? getProject(t.projectId) : null;
               const client = proj?.clientId ? getClient(proj.clientId) : null;
-              return `<tr style="border-bottom:1px solid var(--border)"><td style="text-align:left;padding:10px 14px"><strong>${t.name}</strong></td><td style="text-align:left;padding:10px 14px">${proj ? proj.name : '—'}</td><td style="text-align:left;padding:10px 14px">${client ? clientName(client.id) : '—'}</td><td style="text-align:left;padding:10px 14px"><button class="btn btn-ghost btn-sm" onclick="openTaskModal('${t.id}')" title="Edit" style="font-size:16px;padding:4px 8px;margin-right:4px">✏️</button><button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')" title="Delete" style="font-size:16px;padding:4px 8px;color:var(--red)">🗑️</button></td></tr>`;
+              return `<tr style="border-bottom:1px solid var(--border)"><td style="text-align:left;padding:10px 14px"><strong>${t.name}</strong></td><td style="text-align:left;padding:10px 14px">${proj ? proj.name : '—'}</td><td style="text-align:left;padding:10px 14px">${client ? clientName(client.id) : '—'}</td><td style="text-align:left;padding:10px 14px"><button class="btn btn-ghost btn-sm" onclick="openTaskModal('${t.id}')" title="Edit" style="font-size:14px;padding:4px 8px;margin-right:4px">✏️</button><button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')" title="Delete" style="font-size:14px;padding:4px 8px;color:var(--red)">🗑️</button></td></tr>`;
             }).join('')}
           </tbody>
         </table></div>`}
